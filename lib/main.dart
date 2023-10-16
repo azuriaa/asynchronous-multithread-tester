@@ -36,21 +36,25 @@ class _HomeAppState extends State<HomeApp> {
     // Update indikator child proses pada UI
     setState(() {
       currentProccess++;
-      logs.add('proses nomor: $currentProccess dimulai');
     });
 
     // ini spawn child proses
-    await compute((message) => null, 0);
+    int current = await compute((message) => message, currentProccess);
 
     // Update indikator child proses UI
     setState(() {
-      logs.add('proses nomor: $currentProccess selesai');
+      logs.add('proses nomor: $current selesai');
       currentProccess--;
     });
   }
 
   // Jalankan child proses
   void tryRun() {
+    // Kosongkan dulu logs
+    setState(() {
+      logs = [''];
+    });
+
     // Ubah dulu ke int, karna teks form jenis String
     int workerLimit = int.parse(limitProccess.value.text);
 
