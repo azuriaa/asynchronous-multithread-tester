@@ -32,24 +32,22 @@ class _HomeAppState extends State<HomeApp> {
   // variable untuk penampung teks limit runner
   TextEditingController limitProccess = TextEditingController();
 
-  Future<void> worker() async {
-    // Update indikator child proses pada UI
-    setState(() {
-      currentProccess++;
-    });
-
-    // ini spawn child proses
-    int current = await compute((message) => message, currentProccess);
+  Future<void> worker(int number) async {
+    // spawn child proses
+    String result = await compute(
+      (message) => 'proses ke: $message selesai',
+      number,
+    );
 
     // Update indikator child proses UI
     setState(() {
-      logs.add('proses nomor: $current selesai');
+      logs.add(result);
       currentProccess--;
     });
   }
 
   // Jalankan child proses
-  void tryRun() {
+  void runner() {
     // Kosongkan dulu logs
     setState(() {
       logs = [''];
@@ -58,12 +56,15 @@ class _HomeAppState extends State<HomeApp> {
     // Ubah dulu ke int, karna teks form jenis String
     int workerLimit = int.parse(limitProccess.value.text);
 
-    // ini jumlah worker yg sudah di spawn ketika 1x klik
-    int spawnedWorker = 0;
+    // Update UI nya sesuai berapa jumlah yang dijalankan
+    setState(() {
+      currentProccess = workerLimit;
+    });
 
     // jalankan worker/child proses sejumlah limit nya
+    int spawnedWorker = 0;
     while (spawnedWorker < workerLimit) {
-      worker();
+      worker(spawnedWorker);
       spawnedWorker++;
     }
   }
@@ -105,7 +106,7 @@ class _HomeAppState extends State<HomeApp> {
               ),
             ),
             if (currentProccess == 0)
-              ElevatedButton(onPressed: tryRun, child: const Text('Run'))
+              ElevatedButton(onPressed: runner, child: const Text('Run'))
             else
               const CircularProgressIndicator(),
             Column(
