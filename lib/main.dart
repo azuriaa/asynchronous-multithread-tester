@@ -1,5 +1,4 @@
-import 'dart:isolate';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -41,7 +40,7 @@ class _HomeAppState extends State<HomeApp> {
     });
 
     // ini spawn child proses
-    await Isolate.run(() {});
+    await compute((message) => null, 0);
 
     // Update indikator child proses UI
     setState(() {
