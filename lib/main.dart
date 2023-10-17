@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -29,14 +31,25 @@ class _HomeAppState extends State<HomeApp> {
   int currentProccess = 0;
   List<String> logs = [''];
 
-  // variable untuk penampung teks limit runner
+  // variable untuk penampung teks limit runner & CPU difficulty
   TextEditingController limitProccess = TextEditingController();
+  TextEditingController cpuStressLevel = TextEditingController();
 
-  Future<void> worker(int number) async {
+  Future<void> worker(int number, int level) async {
     // spawn child proses
     String result = await compute(
-      (message) => 'proses ke: $message selesai',
-      number,
+      (Map message) {
+        Random rng = Random();
+        int a = rng.nextInt(message['level']);
+        List b = [];
+        while (a - 1 != 1) {
+          b.add(a);
+          a = rng.nextInt(message['level']);
+        }
+
+        return 'proses ke: ${message['number']} selesai';
+      },
+      {'number': number, 'level': level},
     );
 
     // Update indikator child proses UI
@@ -55,6 +68,7 @@ class _HomeAppState extends State<HomeApp> {
 
     // Ubah dulu ke int, karna teks form jenis String
     int workerLimit = int.parse(limitProccess.value.text);
+    int level = int.parse(cpuStressLevel.value.text);
 
     // Update UI nya sesuai berapa jumlah yang dijalankan
     setState(() {
@@ -64,7 +78,7 @@ class _HomeAppState extends State<HomeApp> {
     // jalankan worker/child proses sejumlah limit nya
     int spawnedWorker = 0;
     while (spawnedWorker < workerLimit) {
-      worker(spawnedWorker);
+      worker(spawnedWorker, level);
       spawnedWorker++;
     }
   }
@@ -76,6 +90,7 @@ class _HomeAppState extends State<HomeApp> {
 
     // Set default teks form nya menjadi 0 agar tidak kosong
     limitProccess.text = '0';
+    cpuStressLevel.text = '1000';
   }
 
   // Bagian UI
@@ -98,7 +113,20 @@ class _HomeAppState extends State<HomeApp> {
                 controller: limitProccess,
                 decoration: const InputDecoration(
                   border: UnderlineInputBorder(),
-                  labelText: 'Proses limit',
+                  labelText: 'Jumlah Child Proses',
+                ),
+                inputFormatters: <TextInputFormatter>[
+                  FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(8),
+              child: TextField(
+                controller: cpuStressLevel,
+                decoration: const InputDecoration(
+                  border: UnderlineInputBorder(),
+                  labelText: 'Tingkat Stress CPU',
                 ),
                 inputFormatters: <TextInputFormatter>[
                   FilteringTextInputFormatter.allow(RegExp('[0-9.]')),
